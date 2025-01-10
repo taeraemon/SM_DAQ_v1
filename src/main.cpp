@@ -20,6 +20,11 @@ float tc_raw2phy(int adcValue) {
     return (voltage - 1.25) / 0.005;    // (5mV/°C)
 }
 
+float pt_raw2phy(int adcValue, int range) {
+    float voltage = (adcValue / 4096.0) * 3.3;
+    return voltage; // TODO : range conversion implementation
+}
+
 void processSerialInput(String input) {
     JsonDocument doc;
     DeserializationError error = deserializeJson(doc, input);
@@ -74,18 +79,27 @@ void loop()
 
     JsonDocument doc;
 
-    int adc1 = analogRead(ADC_TC_CH1);
-    int adc2 = analogRead(ADC_TC_CH2);
-    int adc3 = analogRead(ADC_TC_CH3);
+    int adc_pt1 = analogRead(ADC_PT_CH1);
+    int adc_pt2 = analogRead(ADC_PT_CH2);
+    int adc_pt3 = analogRead(ADC_PT_CH3);
+    int adc_tc1 = analogRead(ADC_TC_CH1);
+    int adc_tc2 = analogRead(ADC_TC_CH2);
+    int adc_tc3 = analogRead(ADC_TC_CH3);
 
-    doc["tc1_raw"] = adc1;
-    doc["tc2_raw"] = adc2;
-    doc["tc3_raw"] = adc3;
+    doc["pt1_raw"] = adc_pt1;
+    doc["pt2_raw"] = adc_pt2;
+    doc["pt3_raw"] = adc_pt3;
+    doc["tc1_raw"] = adc_tc1;
+    doc["tc2_raw"] = adc_tc2;
+    doc["tc3_raw"] = adc_tc3;
 
     // ADC 값을 온도로 변환
-    doc["tc1"] = tc_raw2phy(adc1);
-    doc["tc2"] = tc_raw2phy(adc2);
-    doc["tc3"] = tc_raw2phy(adc3);
+    doc["pt1"] = pt_raw2phy(adc_pt1, 100);
+    doc["pt2"] = pt_raw2phy(adc_pt2, 100);
+    doc["pt3"] = pt_raw2phy(adc_pt3, 100);
+    doc["tc1"] = tc_raw2phy(adc_tc1);
+    doc["tc2"] = tc_raw2phy(adc_tc2);
+    doc["tc3"] = tc_raw2phy(adc_tc3);
 
     serializeJson(doc, Serial);
     Serial.println();
