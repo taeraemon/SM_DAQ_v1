@@ -16,6 +16,7 @@
 
 String buf_serial = "";
 uint32_t prev_ms_log = 0;
+uint32_t prev_ms_seq = 0;
 uint8_t mode = 0;   // 0 : idle, 1 : sequence       // TODO : design state machine for safety
 
 float tc_raw2phy(int adcValue) {
@@ -35,12 +36,21 @@ void processSerialInput(String input) {
     if (!error)
     {
         if (doc["seq"].is<int>()) {
-            int cmdCali = doc["cmd_cali"];
-            if (cmdCali) {  // Sequence Start
+            int cmdseq = doc["seq"];
+            if ((mode == 0) && (cmdseq == 1)) {         // Sequence Start
                 Serial.println("Sequence Start.");
+                mode = 1;
+                prev_ms_seq = millis();
             }
-            else {          // Sequence Stop
+            else if ((mode == 1) && (cmdseq == 0)) {    // Sequence Stop
                 Serial.println("Sequence Stop.");
+                mode = 0;
+                digitalWrite(OUT_SV_CH1, LOW);
+                digitalWrite(OUT_SV_CH2, LOW);
+                digitalWrite(OUT_IG, LOW);
+            }
+            else {
+                Serial.println("Not available.");
             }
         }
         else {
@@ -58,7 +68,7 @@ void processSerialInput(String input) {
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(921600);
 
     pinMode(ADC_PT_CH1, INPUT);
     pinMode(ADC_PT_CH2, INPUT);
@@ -66,10 +76,45 @@ void setup()
     pinMode(ADC_TC_CH1, INPUT);
     pinMode(ADC_TC_CH2, INPUT);
     pinMode(ADC_TC_CH3, INPUT);
+
+    pinMode(OUT_SV_CH1, OUTPUT);
+    pinMode(OUT_SV_CH2, OUTPUT);
+    pinMode(OUT_IG,     OUTPUT);
 }
 
 void loop()
 {
+    if (mode) {
+        // TODO : Sequence Implement, only for Example
+        if (millis() - prev_ms_seq >= 1000) {
+            digitalWrite(OUT_SV_CH1, HIGH);
+        }
+
+        if (millis() - prev_ms_seq >= 1500) {
+            digitalWrite(OUT_SV_CH1, LOW);
+        }
+
+        if (millis() - prev_ms_seq >= 2000) {
+            digitalWrite(OUT_SV_CH2, HIGH);
+        }
+
+        if (millis() - prev_ms_seq >= 2500) {
+            digitalWrite(OUT_SV_CH2, LOW);
+        }
+
+        if (millis() - prev_ms_seq >= 3000) {
+            digitalWrite(OUT_IG, HIGH);
+        }
+
+        if (millis() - prev_ms_seq >= 3500) {
+            digitalWrite(OUT_IG, LOW);
+        }
+
+        if (millis() - prev_ms_seq >= 5000) {
+            mode = 0;
+        }
+    }
+
     while (Serial.available()) {
         char incomingChar = Serial.read();
         if (incomingChar == '\n') {
@@ -87,6 +132,7 @@ void loop()
 
         // 1. Time
         doc["time"] = millis();
+        doc["time_seq"] = mode * (millis() - prev_ms_seq);
 
         // 2. State
         doc["state"] = mode;
