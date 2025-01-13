@@ -80,39 +80,36 @@ void setup()
     pinMode(OUT_SV_CH1, OUTPUT);
     pinMode(OUT_SV_CH2, OUTPUT);
     pinMode(OUT_IG,     OUTPUT);
+    digitalWrite(OUT_SV_CH1, LOW);
+    digitalWrite(OUT_SV_CH2, LOW);
+    digitalWrite(OUT_IG,     LOW);
 }
 
 void loop()
 {
     if (mode) {
         // TODO : Sequence Implement, only for Example
+        uint8_t cmd_out_sv_ch1 = LOW;
+        uint8_t cmd_out_sv_ch2 = LOW;
+        uint8_t cmd_out_ig     = LOW;
+        uint8_t cmd_mode       = 1;
+
         if (millis() - prev_ms_seq >= 1000) {
-            digitalWrite(OUT_SV_CH1, HIGH);
-        }
-
-        if (millis() - prev_ms_seq >= 1500) {
-            digitalWrite(OUT_SV_CH1, LOW);
-        }
-
-        if (millis() - prev_ms_seq >= 2000) {
-            digitalWrite(OUT_SV_CH2, HIGH);
+            cmd_out_ig = HIGH;
         }
 
         if (millis() - prev_ms_seq >= 2500) {
-            digitalWrite(OUT_SV_CH2, LOW);
-        }
-
-        if (millis() - prev_ms_seq >= 3000) {
-            digitalWrite(OUT_IG, HIGH);
-        }
-
-        if (millis() - prev_ms_seq >= 3500) {
-            digitalWrite(OUT_IG, LOW);
+            cmd_out_ig = LOW;
         }
 
         if (millis() - prev_ms_seq >= 5000) {
-            mode = 0;
+            cmd_mode = 0;
         }
+
+        digitalWrite(OUT_SV_CH1, cmd_out_sv_ch1);
+        digitalWrite(OUT_SV_CH2, cmd_out_sv_ch2);
+        digitalWrite(OUT_IG,     cmd_out_ig);
+        mode = cmd_mode;
     }
 
     while (Serial.available()) {
