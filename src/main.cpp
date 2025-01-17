@@ -26,8 +26,12 @@ float tc_raw2phy(int adcValue) {
 }
 
 float pt_raw2phy(int adcValue, int range) {
-    float voltage = (adcValue / 4096.0) * 3.3;
-    return voltage; // TODO : range conversion implementation
+    // float voltage = (adcValue / 4096.0) * 3.3;
+    // 4mA raw value : 445
+    // 20mA raw value : 2880
+    float mappedValue = max(0.0, (adcValue - 445) * (range - 1.0) / (2880 - 445) + 1.0);
+    
+    return mappedValue;
 }
 
 void processSerialInput(String input) {
@@ -125,7 +129,7 @@ void loop()
     }
 
     uint32_t curr_ms = millis();
-    if (curr_ms - prev_ms_log >= 100) {
+    if (curr_ms - prev_ms_log >= 10) {
         prev_ms_log = curr_ms;
         JsonDocument doc;
 
@@ -153,8 +157,8 @@ void loop()
         doc["tc3_raw"] = adc_tc3;
         doc["lc1_raw"] = adc_lc1;
 
-        doc["pt1"] = pt_raw2phy(adc_pt1, 100);
-        doc["pt2"] = pt_raw2phy(adc_pt2, 100);
+        doc["pt1"] = pt_raw2phy(adc_pt1, 69);      // assume 69bar / 1000psi PT
+        doc["pt2"] = pt_raw2phy(adc_pt2, 69);      // assume 69bar / 1000psi PT
         // doc["pt3"] = pt_raw2phy(adc_pt3, 100);
         doc["tc1"] = tc_raw2phy(adc_tc1);
         doc["tc2"] = tc_raw2phy(adc_tc2);
