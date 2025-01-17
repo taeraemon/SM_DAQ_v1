@@ -1,10 +1,11 @@
 // Inputs   // TODO : add Loadcell
 #define ADC_PT_CH1 39
 #define ADC_PT_CH2 34
-#define ADC_PT_CH3 35
+// #define ADC_PT_CH3 35    // Use for Loadcell temporary
 #define ADC_TC_CH1 25
 #define ADC_TC_CH2 26
 #define ADC_TC_CH3 27
+#define ADC_LC_CH1 35   // Borrowed from PT_CH3
 
 // Outpputs
 #define OUT_SV_CH1 14
@@ -72,10 +73,11 @@ void setup()
 
     pinMode(ADC_PT_CH1, INPUT);
     pinMode(ADC_PT_CH2, INPUT);
-    pinMode(ADC_PT_CH3, INPUT);
+    // pinMode(ADC_PT_CH3, INPUT);
     pinMode(ADC_TC_CH1, INPUT);
     pinMode(ADC_TC_CH2, INPUT);
     pinMode(ADC_TC_CH3, INPUT);
+    pinMode(ADC_LC_CH1, INPUT);
 
     pinMode(OUT_SV_CH1, OUTPUT);
     pinMode(OUT_SV_CH2, OUTPUT);
@@ -123,7 +125,7 @@ void loop()
     }
 
     uint32_t curr_ms = millis();
-    if (curr_ms - prev_ms_log >= 10) {
+    if (curr_ms - prev_ms_log >= 100) {
         prev_ms_log = curr_ms;
         JsonDocument doc;
 
@@ -137,24 +139,27 @@ void loop()
         // 3. Input
         int adc_pt1 = analogRead(ADC_PT_CH1);
         int adc_pt2 = analogRead(ADC_PT_CH2);
-        int adc_pt3 = analogRead(ADC_PT_CH3);
+        // int adc_pt3 = analogRead(ADC_PT_CH3);
         int adc_tc1 = analogRead(ADC_TC_CH1);
         int adc_tc2 = analogRead(ADC_TC_CH2);
         int adc_tc3 = analogRead(ADC_TC_CH3);
+        int adc_lc1 = analogRead(ADC_LC_CH1);
 
         doc["pt1_raw"] = adc_pt1;
         doc["pt2_raw"] = adc_pt2;
-        doc["pt3_raw"] = adc_pt3;
+        // doc["pt3_raw"] = adc_pt3;
         doc["tc1_raw"] = adc_tc1;
         doc["tc2_raw"] = adc_tc2;
         doc["tc3_raw"] = adc_tc3;
+        doc["lc1_raw"] = adc_lc1;
 
         doc["pt1"] = pt_raw2phy(adc_pt1, 100);
         doc["pt2"] = pt_raw2phy(adc_pt2, 100);
-        doc["pt3"] = pt_raw2phy(adc_pt3, 100);
+        // doc["pt3"] = pt_raw2phy(adc_pt3, 100);
         doc["tc1"] = tc_raw2phy(adc_tc1);
         doc["tc2"] = tc_raw2phy(adc_tc2);
         doc["tc3"] = tc_raw2phy(adc_tc3);
+        doc["lc1"] = (adc_lc1 - 1930) * 10; // TODO : implement conversion
 
         // 4. Output
         doc["sv1"] = digitalRead(OUT_SV_CH1);
@@ -162,7 +167,8 @@ void loop()
         doc["ig"]  = digitalRead(OUT_IG);
 
         // Final : 
-        serializeJson(doc, Serial);
+        // serializeJson(doc, Serial);
+        serializeJsonPretty(doc, Serial);
         Serial.println();
     }
 }
