@@ -58,6 +58,24 @@ void processSerialInput(String input) {
                 Serial.println("Not available.");
             }
         }
+        else if (doc["sv1"].is<int>()) {
+            int cmdsv1 = doc["sv1"];
+            if (cmdsv1 == 1) {      digitalWrite(OUT_SV_CH1, HIGH); Serial.println("Manual SV1 Open");  }
+            else if (cmdsv1 == 0) { digitalWrite(OUT_SV_CH1, LOW);  Serial.println("Manual SV1 Close"); }
+            else {                                                  Serial.println("Not available.");   }
+        }
+        else if (doc["sv2"].is<int>()) {
+            int cmdsv2 = doc["sv2"];
+            if (cmdsv2 == 1) {      digitalWrite(OUT_SV_CH2, HIGH); Serial.println("Manual SV2 Open");  }
+            else if (cmdsv2 == 0) { digitalWrite(OUT_SV_CH2, LOW);  Serial.println("Manual SV2 Close"); }
+            else {                                                  Serial.println("Not available.");   }
+        }
+        else if (doc["ig"].is<int>()) {
+            int cmdig = doc["ig"];
+            if (cmdig == 1) {      digitalWrite(OUT_IG, HIGH); Serial.println("Manual IG Open");  }
+            else if (cmdig == 0) { digitalWrite(OUT_IG, LOW);  Serial.println("Manual IG Close"); }
+            else {                                             Serial.println("Not available.");  }
+        }
         else {
             Serial.println("Unknown Command");
         }
