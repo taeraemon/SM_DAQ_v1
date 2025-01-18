@@ -48,7 +48,7 @@ void processSerialInput(String input) {
                 prev_ms_seq = millis();
             }
             else if ((mode == 1) && (cmdseq == 0)) {    // Sequence Stop
-                Serial.println("Sequence Stop.");
+                Serial.println("Manual Sequence Stop.");
                 mode = 0;
                 digitalWrite(OUT_SV_CH1, LOW);
                 digitalWrite(OUT_SV_CH2, LOW);
@@ -127,6 +127,7 @@ void loop()
         }
 
         if (millis() - prev_ms_seq >= 5000) {
+            Serial.println("Sequence Done.");
             cmd_mode = 0;
         }
 
@@ -189,8 +190,8 @@ void loop()
         doc["ig"]  = digitalRead(OUT_IG);
 
         // Final : 
-        // serializeJson(doc, Serial);
-        serializeJsonPretty(doc, Serial);
+        serializeJson(doc, Serial);
+        // serializeJsonPretty(doc, Serial);
         Serial.println();
     }
 }
